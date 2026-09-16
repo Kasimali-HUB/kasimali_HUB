@@ -30,6 +30,7 @@ def employer_social_premiums(
 
     awf_rate = AWF_LOW if permanent_contract else AWF_HIGH
     aof_rate = AOF_HIGH if large_employer else AOF_LOW
+    using_sector_average_whk = whk_rate is None
     whk = whk_rate if whk_rate is not None else WHK_SECTOR_AVERAGE
 
     awf = round(premie_grondslag * awf_rate, 2)
@@ -46,4 +47,8 @@ def employer_social_premiums(
         "whk": whk_amount,
         "zvw_employer": zvw,
         "total_employer_premiums": total,
+        # Surfaced deliberately: True means this run used the published
+        # sector average, not this client's actual assessed Whk rate.
+        # A real client's payroll should never go live with this True.
+        "whk_is_sector_average": using_sector_average_whk,
     }
