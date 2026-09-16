@@ -17,6 +17,8 @@ class PayslipInput:
     large_employer: bool = True
     whk_rate: float | None = None
     pension_employer_contribution: float = 0.0  # annual amount, if applicable
+    is_aow_age: bool = False
+    born_before_1946: bool = False  # only relevant when is_aow_age is True
 
 
 @dataclass
@@ -30,7 +32,11 @@ class PayslipResult:
 
 
 def calculate_nl_payslip(payslip_input: PayslipInput) -> PayslipResult:
-    wage_tax = annual_wage_tax_withheld(payslip_input.annual_gross_salary)
+    wage_tax = annual_wage_tax_withheld(
+        payslip_input.annual_gross_salary,
+        is_aow_age=payslip_input.is_aow_age,
+        born_before_1946=payslip_input.born_before_1946,
+    )
     employer_premiums = employer_social_premiums(
         payslip_input.annual_gross_salary,
         permanent_contract=payslip_input.permanent_contract,

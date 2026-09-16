@@ -24,6 +24,13 @@ class Settings(BaseSettings):
     # additional countries are added here as their legislation modules land.
     enabled_countries: list[str] = ["NL"]
 
+    # Secret used to derive pseudonymized employee tokens (see app/privacy).
+    # This never leaves "our systems" - the whole point is that the AI layer
+    # never has it, so it can never reverse a token back to an employee.
+    # MUST be overridden via env var in any real deployment; this default is
+    # only for local dev / tests.
+    pseudonymization_secret: str = "dev-only-change-me"
+
 
 @lru_cache
 def get_settings() -> Settings:
