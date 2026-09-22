@@ -18,7 +18,10 @@ class Settings(BaseSettings):
     api_v1_prefix: str = "/api/v1"
 
     # Database
-    database_url: str = "postgresql+asyncpg://gpip:gpip@localhost:5432/gpip"
+    # Dev/local default: file-based SQLite, needs nothing installed or
+    # running separately. Production MUST override this via env var to a
+    # real Postgres instance - this default is not durable/concurrent-safe.
+    database_url: str = "sqlite+aiosqlite:///./gpip_dev.db"
 
     # Country modules enabled for this deployment. Start with Netherlands only;
     # additional countries are added here as their legislation modules land.
@@ -30,6 +33,10 @@ class Settings(BaseSettings):
     # MUST be overridden via env var in any real deployment; this default is
     # only for local dev / tests.
     pseudonymization_secret: str = "dev-only-change-me"
+
+    # Frontend dev server origins allowed to call this API. Add the real
+    # frontend's deployed origin here (or override via env) before go-live.
+    cors_allowed_origins: list[str] = ["http://localhost:5173", "http://127.0.0.1:5173"]
 
 
 @lru_cache

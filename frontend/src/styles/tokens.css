@@ -1,0 +1,61 @@
+:root {
+  /* Paper, not cream - cooler and greyer than the default AI-generated warm cream */
+  --bg: #f2f3ef;
+  --surface: #ffffff;
+  --surface-sunken: #ebece7;
+
+  /* Ink, not pure black */
+  --ink: #16223b;
+  --ink-soft: #55607a;
+  --ink-faint: #8b93a6;
+
+  --line: #dad6cb;
+  --line-strong: #b9b5a8;
+
+  /* Deep ledger-teal - the one accent spent on interactive elements */
+  --accent: #234e42;
+  --accent-soft: #e4ebe7;
+
+  /* Reserved strictly for numeric status - never decoration */
+  --status-ok: #3b6b4f;
+  --status-flag: #9c4221;
+  --status-flag-bg: #f5e6dd;
+
+  --radius: 3px;
+  --font-display: "Source Serif 4", Georgia, serif;
+  --font-ui: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12161f;
+    --surface: #1a2130;
+    --surface-sunken: #10141c;
+    --ink: #eceef2;
+    --ink-soft: #a7afc0;
+    --ink-faint: #6c7488;
+    --line: #2b3345;
+    --line-strong: #3a4358;
+    --accent: #6fae98;
+    --accent-soft: #1e2c28;
+    --status-ok: #6fae82;
+    --status-flag: #d68a63;
+    --status-flag-bg: #2e2018;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #12161f;
+  --surface: #1a2130;
+  --surface-sunken: #10141c;
+  --ink: #eceef2;
+  --ink-soft: #a7afc0;
+  --ink-faint: #6c7488;
+  --line: #2b3345;
+  --line-strong: #3a4358;
+  --accent: #6fae98;
+  --accent-soft: #1e2c28;
+  --status-ok: #6fae82;
+  --status-flag: #d68a63;
+  --status-flag-bg: #2e2018;
+}

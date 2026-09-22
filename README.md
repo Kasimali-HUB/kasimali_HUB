@@ -27,23 +27,39 @@ Import convention: always `from app...`, never `from backend.app...`.
 
 ## Local setup
 
+Backend:
 ```
 pip install -r requirements.txt
 cp .env.example .env
 uvicorn app.main:app --reload
 pytest
 ```
+Dev mode uses a local SQLite file (created automatically on first run,
+seeded with demo data) - nothing else needs to be installed or running.
+Production overrides `DATABASE_URL` to a real Postgres instance.
+
+Frontend:
+```
+cd frontend
+npm install
+cp .env.example .env
+npm run dev
+```
+Runs at http://localhost:5173, calling the API at http://localhost:8000.
 
 ## Build phases
 
-1. **Foundation** (this commit) — FastAPI skeleton, config, DB session, health
-   check, test scaffolding, CI.
-2. **Netherlands calculation engine** — income tax, AOW/ANW/WLZ, employer cost,
-   payroll cycle logic.
+1. **Foundation** — FastAPI skeleton, config, DB session, health check,
+   test scaffolding, CI.
+2. **Netherlands calculation engine** — income tax, AOW/ANW/WLZ, employer
+   cost, payroll cycle logic. Done, including AOW-age handling.
 3. **Privacy-safe AI layer** — pseudonymization/exception service,
-   gross-to-net validation, legislation Q&A (RAG, statute-only).
-4. **Frontend** — dashboard, client management, import payroll, exception
-   triage screen.
-5. **Infrastructure** — containerization, deployment.
-6. **Testing & compliance validation** — reconciliation against known-good
+   gross-to-net validation. Done.
+4. **Legislation Q&A** — RAG over a statute-only corpus, no employee data.
+   Done.
+5. **Frontend** — dashboard, client select, import payroll, exception
+   review. Backend endpoints + React app done; real payroll-run ingestion
+   (vs. demo data) still open.
+6. **Infrastructure** — containerization, deployment.
+7. **Testing & compliance validation** — reconciliation against known-good
    calculations before anything touches real payroll data.
