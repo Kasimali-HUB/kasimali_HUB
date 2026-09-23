@@ -2,6 +2,8 @@
 and Base.metadata.create_all() picks up all tables."""
 
 from app.db.models.client import Client
+from app.db.models.exception_record import ExceptionRecord
+from app.db.models.payroll_run_employee import PayrollRunEmployee
 from app.db.models.payroll_summary import PayrollSummary
 
-__all__ = ["Client", "PayrollSummary"]
+__all__ = ["Client", "ExceptionRecord", "PayrollRunEmployee", "PayrollSummary"]

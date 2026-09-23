@@ -40,3 +40,17 @@ export interface LegislationAnswer {
   sources: SourceCitation[];
   generated_by_llm: boolean;
 }
+
+export interface ImportResult {
+  headcount: number;
+  total_gross: number;
+  employer_cost: number;
+  flagged_count: number;
+}
+
+export interface PayrollRun {
+  client_id: number;
+  client_name: string;
+  year: number;
+  period: string;
+}
