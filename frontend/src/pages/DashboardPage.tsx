@@ -41,10 +41,8 @@ export function DashboardPage() {
 
       {error && <p className="empty-state">{error}</p>}
 
-      <div className="controls-row">
-        <label htmlFor="client-select" style={{ color: "var(--ink-soft)", fontSize: 13.5 }}>
-          Client
-        </label>
+      <div className="field-group" style={{ maxWidth: 260 }}>
+        <label htmlFor="client-select">Client</label>
         <select
           id="client-select"
           value={selectedClientId}

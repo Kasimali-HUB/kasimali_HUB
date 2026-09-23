@@ -81,9 +81,9 @@ export function ExceptionTriagePage() {
       {error && <p className="empty-state">{error}</p>}
 
       {runs.length > 0 && (
-        <div className="controls-row">
-          <label style={{ color: "var(--ink-soft)", fontSize: 13.5 }}>Run</label>
-          <select value={selectedRunKey ?? ""} onChange={(e) => setSelectedRunKey(e.target.value)}>
+        <div className="field-group" style={{ maxWidth: 320 }}>
+          <label htmlFor="run-select">Run</label>
+          <select id="run-select" value={selectedRunKey ?? ""} onChange={(e) => setSelectedRunKey(e.target.value)}>
             {runs.map((run) => (
               <option key={runKey(run)} value={runKey(run)}>
                 {run.client_name} — {run.period}
@@ -94,7 +94,7 @@ export function ExceptionTriagePage() {
       )}
 
       {usingSampleData && (
-        <p style={{ color: "var(--ink-faint)", fontSize: 12.5, marginBottom: 16 }}>
+        <p className="hint" style={{ marginBottom: 16 }}>
           No payroll has been imported yet — showing sample data. Import a run on the Import
           Payroll page to see real results here.
         </p>
