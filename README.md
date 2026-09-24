@@ -31,12 +31,18 @@ Backend:
 ```
 pip install -r requirements.txt
 cp .env.example .env
-uvicorn app.main:app --reload
+python -m app.main
 pytest
 ```
 Dev mode uses a local SQLite file (created automatically on first run,
 seeded with demo data) - nothing else needs to be installed or running.
 Production overrides `DATABASE_URL` to a real Postgres instance.
+
+`python -m app.main` (rather than `uvicorn app.main:app --reload`) matters
+in Codespaces/Docker/WSL: it binds to `0.0.0.0` so the port can actually be
+forwarded out of the container. `uvicorn`'s own default (`127.0.0.1`) only
+accepts connections from inside the container - the port can still show as
+"active" while being completely unreachable from your browser.
 
 Frontend:
 ```
@@ -46,6 +52,11 @@ cp .env.example .env
 npm run dev
 ```
 Runs at http://localhost:5173, calling the API at http://localhost:8000.
+In Codespaces, the frontend detects its own forwarded address and finds
+the backend's forwarded address automatically - no manual URL setup
+needed. If a port's browser tab 404s right after starting it, open it
+from the Ports panel's own link rather than a reused/old tab; Codespaces
+can rotate the forwarded address between sessions.
 
 ## Build phases
 

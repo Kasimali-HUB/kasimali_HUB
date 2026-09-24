@@ -44,6 +44,11 @@ app = FastAPI(title=settings.app_name, lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_allowed_origins,
+    # Codespaces forwards the frontend at a per-instance hostname like
+    # "effective-lamp-xxxx-5173.app.github.dev" - can't list every one in
+    # advance, so this pattern allows any of them rather than requiring a
+    # manual CORS update per Codespace.
+    allow_origin_regex=r"https://.*-5173\.app\.github\.dev",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -55,3 +60,15 @@ app.include_router(api_router, prefix=settings.api_v1_prefix)
 @app.get("/", tags=["root"])
 async def root() -> dict[str, str]:
     return {"app": settings.app_name, "environment": settings.environment}
+
+
+if __name__ == "__main__":
+    import uvicorn
+
+    # host="0.0.0.0" is not optional here - "127.0.0.1" (uvicorn's own
+    # default) only accepts connections from inside this container, which
+    # is unreachable from Codespaces' port forwarding (and from Docker,
+    # WSL, or any other remote dev environment) even though the port shows
+    # as "active". Baking this in means `python -m app.main` always works,
+    # rather than depending on someone remembering `--host 0.0.0.0`.
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)

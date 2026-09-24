@@ -7,7 +7,30 @@ import type {
   PayrollRun,
 } from "../types";
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api/v1";
+function resolveApiBase(): string {
+  // Explicit override always wins (e.g. a real deployed backend URL).
+  const explicit = import.meta.env.VITE_API_BASE_URL;
+  if (explicit) return explicit;
+
+  if (typeof window !== "undefined") {
+    const { hostname, protocol } = window.location;
+    // GitHub Codespaces forwards each port as its own hostname, e.g.
+    // "effective-lamp-xxxx-5173.app.github.dev" for this frontend
+    // (port 5173). "localhost" in the browser means the user's own
+    // laptop, not the Codespace, so it can never reach the backend
+    // there - this derives the backend's forwarded address (port 8000)
+    // from the frontend's own address automatically, with no manual
+    // .env setup needed per Codespace.
+    const codespacesMatch = hostname.match(/^(.*)-5173\.(app\.github\.dev)$/);
+    if (codespacesMatch) {
+      return `${protocol}//${codespacesMatch[1]}-8000.${codespacesMatch[2]}/api/v1`;
+    }
+  }
+
+  return "http://localhost:8000/api/v1";
+}
+
+const API_BASE = resolveApiBase();
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`${API_BASE}${path}`, {
