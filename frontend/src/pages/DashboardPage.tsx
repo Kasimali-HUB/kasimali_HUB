@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { api } from "../api/client";
 import { ChartPanel } from "../components/ChartPanel";
+import { ClientSelect } from "../components/ClientSelect";
 import { StatCard } from "../components/StatCard";
 import type { ClientOut, DashboardSummary } from "../types";
 
@@ -12,7 +13,7 @@ const currencyFormatter = new Intl.NumberFormat("nl-NL", {
 
 export function DashboardPage() {
   const [clients, setClients] = useState<ClientOut[]>([]);
-  const [selectedClientId, setSelectedClientId] = useState<number | "all">("all");
+  const [selectedValue, setSelectedValue] = useState("all");
   const [summary, setSummary] = useState<DashboardSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -24,13 +25,18 @@ export function DashboardPage() {
   useEffect(() => {
     setLoading(true);
     setError(null);
-    const clientId = selectedClientId === "all" ? undefined : selectedClientId;
+    const clientId = selectedValue === "all" ? undefined : Number(selectedValue);
     api
       .dashboardSummary(clientId)
       .then(setSummary)
       .catch(() => setError("Could not load dashboard data."))
       .finally(() => setLoading(false));
-  }, [selectedClientId]);
+  }, [selectedValue]);
+
+  function handleClientCreated(newClient: ClientOut) {
+    setClients((prev) => [...prev, newClient].sort((a, b) => a.name.localeCompare(b.name)));
+    setSelectedValue(String(newClient.id));
+  }
 
   return (
     <div>
@@ -41,22 +47,15 @@ export function DashboardPage() {
 
       {error && <p className="empty-state">{error}</p>}
 
-      <div className="field-group" style={{ maxWidth: 260 }}>
-        <label htmlFor="client-select">Client</label>
-        <select
+      <div style={{ maxWidth: 380 }}>
+        <ClientSelect
           id="client-select"
-          value={selectedClientId}
-          onChange={(event) =>
-            setSelectedClientId(event.target.value === "all" ? "all" : Number(event.target.value))
-          }
-        >
-          <option value="all">All clients</option>
-          {clients.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
-        </select>
+          clients={clients}
+          value={selectedValue}
+          onChange={setSelectedValue}
+          onClientCreated={handleClientCreated}
+          leadingOption={{ value: "all", label: "All clients" }}
+        />
       </div>
 
       <div className="stat-row">

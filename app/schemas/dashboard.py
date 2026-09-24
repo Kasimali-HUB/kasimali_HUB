@@ -9,6 +9,11 @@ class ClientOut(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class ClientCreate(BaseModel):
+    name: str
+    country_code: str = "NL"
+
+
 class ChartPoint(BaseModel):
     period: str
     year: int

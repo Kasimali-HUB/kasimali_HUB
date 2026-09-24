@@ -24,6 +24,12 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 export const api = {
   listClients: () => request<ClientOut[]>("/clients"),
 
+  createClient: (name: string) =>
+    request<ClientOut>("/clients", {
+      method: "POST",
+      body: JSON.stringify({ name }),
+    }),
+
   dashboardSummary: (clientId?: number) =>
     request<DashboardSummary>(clientId ? `/dashboard/summary?client_id=${clientId}` : "/dashboard/summary"),
 

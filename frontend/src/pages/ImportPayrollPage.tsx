@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { ClientSelect } from "../components/ClientSelect";
 import { api } from "../api/client";
 import type { ClientOut, ImportResult } from "../types";
 
@@ -17,39 +18,54 @@ function buildPeriod(year: number, month: number): string {
   return `${year}-${String(month).padStart(2, "0")}`;
 }
 
+const CURRENT_YEAR = new Date().getFullYear();
+// Shown immediately, before the API call returns (or even if it fails) -
+// a brand-new year should always be pickable, not dependent on network data.
+const DEFAULT_YEARS = [CURRENT_YEAR + 1, CURRENT_YEAR];
+
 export function ImportPayrollPage() {
   const [clients, setClients] = useState<ClientOut[]>([]);
   const [selectedClientId, setSelectedClientId] = useState<number | null>(null);
-  const [years, setYears] = useState<number[]>([]);
-  const [selectedYear, setSelectedYear] = useState<number | null>(null);
+  const [years, setYears] = useState<number[]>(DEFAULT_YEARS);
+  const [selectedYear, setSelectedYear] = useState<number>(CURRENT_YEAR);
   const [selectedMonth, setSelectedMonth] = useState<number>(new Date().getMonth() + 1);
   const [file, setFile] = useState<File | null>(null);
   const [status, setStatus] = useState<string | null>(null);
+  const [yearsWarning, setYearsWarning] = useState<string | null>(null);
   const [result, setResult] = useState<ImportResult | null>(null);
   const [importing, setImporting] = useState(false);
 
   useEffect(() => {
-    api.listClients().then((list) => {
-      setClients(list);
-      setSelectedClientId(list[0]?.id ?? null);
-    });
-    api.availableYears().then((list) => {
-      const currentYear = new Date().getFullYear();
-      // Always offer the current year and the next one, even if no data
-      // has been imported for them yet - otherwise a brand-new year would
-      // never be selectable until something existed for it already.
-      const withUpcoming = Array.from(new Set([currentYear, currentYear + 1, ...list])).sort(
-        (a, b) => b - a
-      );
-      setYears(withUpcoming);
-      setSelectedYear(withUpcoming[0]);
-    });
+    api
+      .listClients()
+      .then((list) => {
+        setClients(list);
+        setSelectedClientId((current) => current ?? list[0]?.id ?? null);
+      })
+      .catch(() => setStatus("Could not load clients. Check that the backend is running."));
+
+    api
+      .availableYears()
+      .then((list) => {
+        const merged = Array.from(new Set([...DEFAULT_YEARS, ...list])).sort((a, b) => b - a);
+        setYears(merged);
+      })
+      .catch(() => {
+        // DEFAULT_YEARS is already showing, so the dropdown still works -
+        // just flag that past years' data may not be reflected.
+        setYearsWarning("Could not load past import years - showing this year and next only.");
+      });
   }, []);
+
+  function handleClientCreated(newClient: ClientOut) {
+    setClients((prev) => [...prev, newClient].sort((a, b) => a.name.localeCompare(b.name)));
+    setSelectedClientId(newClient.id);
+  }
 
   async function handleImport() {
     setResult(null);
-    if (!selectedClientId || !selectedYear || !file) {
-      setStatus("Choose a client, year, and month, and select a file.");
+    if (!selectedClientId || !file) {
+      setStatus("Choose a client and a file first.");
       return;
     }
     setImporting(true);
@@ -72,28 +88,21 @@ export function ImportPayrollPage() {
         <p>Select the client, year, and month, then upload the payroll file.</p>
       </div>
 
-      <div className="panel" style={{ maxWidth: 460 }}>
-        <div className="field-group">
-          <label htmlFor="import-client">Client</label>
-          <select
-            id="import-client"
-            value={selectedClientId ?? ""}
-            onChange={(e) => setSelectedClientId(Number(e.target.value))}
-          >
-            {clients.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </div>
+      <div className="panel" style={{ maxWidth: 480 }}>
+        <ClientSelect
+          id="import-client"
+          clients={clients}
+          value={selectedClientId !== null ? String(selectedClientId) : ""}
+          onChange={(v) => setSelectedClientId(v ? Number(v) : null)}
+          onClientCreated={handleClientCreated}
+        />
 
         <div className="field-row" style={{ marginBottom: 16 }}>
           <div className="field-group" style={{ marginBottom: 0 }}>
             <label htmlFor="import-year">Year</label>
             <select
               id="import-year"
-              value={selectedYear ?? ""}
+              value={selectedYear}
               onChange={(e) => setSelectedYear(Number(e.target.value))}
             >
               {years.map((year) => (
@@ -119,6 +128,7 @@ export function ImportPayrollPage() {
             </select>
           </div>
         </div>
+        {yearsWarning && <p className="hint" style={{ marginTop: -10, marginBottom: 16 }}>{yearsWarning}</p>}
 
         <div className="field-group">
           <label htmlFor="import-file">Payroll file</label>
@@ -142,7 +152,7 @@ export function ImportPayrollPage() {
         {result && (
           <div className="result-panel">
             <p className="result-heading">
-              Import complete — {selectedYear && buildPeriod(selectedYear, selectedMonth)}
+              Import complete — {buildPeriod(selectedYear, selectedMonth)}
             </p>
             <div className="result-row">
               <span>Headcount</span>
