@@ -19,7 +19,7 @@ export function DashboardPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    api.listClients().then(setClients).catch(() => setError("Could not load clients."));
+    api.listClients().then(setClients).catch((err) => setError(err instanceof Error ? err.message : "Could not load clients."));
   }, []);
 
   useEffect(() => {
@@ -29,7 +29,7 @@ export function DashboardPage() {
     api
       .dashboardSummary(clientId)
       .then(setSummary)
-      .catch(() => setError("Could not load dashboard data."))
+      .catch((err) => setError(err instanceof Error ? err.message : "Could not load dashboard data."))
       .finally(() => setLoading(false));
   }, [selectedValue]);
 

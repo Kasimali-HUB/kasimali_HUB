@@ -42,7 +42,7 @@ export function ImportPayrollPage() {
         setClients(list);
         setSelectedClientId((current) => current ?? list[0]?.id ?? null);
       })
-      .catch(() => setStatus("Could not load clients. Check that the backend is running."));
+      .catch((err) => setStatus(err instanceof Error ? err.message : "Could not load clients."));
 
     api
       .availableYears()

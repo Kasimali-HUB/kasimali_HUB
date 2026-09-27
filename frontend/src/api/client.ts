@@ -32,8 +32,25 @@ function resolveApiBase(): string {
 
 const API_BASE = resolveApiBase();
 
+/**
+ * Wraps fetch's own network-level failure (a bare "Failed to fetch" with
+ * no further detail - can't reach the host at all, CORS rejected before
+ * any response, DNS failure, etc.) with the exact URL that was tried, so
+ * the error on screen is something a person can actually act on or report
+ * back, instead of an unexplained "Failed to fetch".
+ */
+async function fetchWithClearError(url: string, init?: RequestInit): Promise<Response> {
+  try {
+    return await fetch(url, init);
+  } catch {
+    throw new Error(
+      `Could not reach the backend at ${url}. Check that it's running, and that this URL is reachable from your browser (not just from inside the Codespace).`
+    );
+  }
+}
+
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_BASE}${path}`, {
+  const response = await fetchWithClearError(`${API_BASE}${path}`, {
     headers: { "Content-Type": "application/json" },
     ...init,
   });
@@ -45,6 +62,8 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
+  apiBase: API_BASE, // exposed so the UI can display it for troubleshooting
+
   listClients: () => request<ClientOut[]>("/clients"),
 
   createClient: (name: string) =>
@@ -77,7 +96,7 @@ export const api = {
     });
     // No Content-Type header here on purpose - the browser sets the
     // multipart boundary itself; overriding it breaks the upload.
-    const response = await fetch(`${API_BASE}/payroll-runs/import?${params}`, {
+    const response = await fetchWithClearError(`${API_BASE}/payroll-runs/import?${params}`, {
       method: "POST",
       body: formData,
     });

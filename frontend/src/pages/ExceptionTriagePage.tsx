@@ -38,7 +38,7 @@ export function ExceptionTriagePage() {
           setUsingSampleData(true);
         }
       })
-      .catch(() => setError("Could not load payroll runs."));
+      .catch((err) => setError(err instanceof Error ? err.message : "Could not load payroll runs."));
   }, []);
 
   useEffect(() => {
@@ -53,7 +53,7 @@ export function ExceptionTriagePage() {
           setPayloads([...result].sort((a, b) => Number(b.flagged) - Number(a.flagged)));
           setUsingSampleData(true);
         })
-        .catch(() => setError("Could not load the exception queue."))
+        .catch((err) => setError(err instanceof Error ? err.message : "Could not load the exception queue."))
         .finally(() => setLoading(false));
       return;
     }
@@ -65,7 +65,7 @@ export function ExceptionTriagePage() {
         setPayloads([...result].sort((a, b) => Number(b.flagged) - Number(a.flagged)));
         setUsingSampleData(false);
       })
-      .catch(() => setError("Could not load the exception queue."))
+      .catch((err) => setError(err instanceof Error ? err.message : "Could not load the exception queue."))
       .finally(() => setLoading(false));
   }, [selectedRunKey]);
 
