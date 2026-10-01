@@ -25,9 +25,37 @@ tests/
 
 Import convention: always `from app...`, never `from backend.app...`.
 
-## Local setup
+## Running it (Codespaces or any local checkout)
 
-Backend:
+```
+./start-dev.sh
+```
+
+This is the one command to use. It installs both the backend and frontend
+dependencies, starts the backend, **actually confirms it responds** before
+doing anything else (not just that the command ran), then starts the
+frontend. If the backend fails to come up, it prints the backend's own log
+so the real error is visible immediately instead of a vague connection
+failure somewhere downstream.
+
+In Codespaces, `.devcontainer/devcontainer.json` sets both ports (8000 and
+5173) to **public visibility automatically** the moment the container is
+created or rebuilt - no manual Ports-tab clicking required, which was the
+single biggest source of "it looks like it's running but nothing works"
+confusion. If you already had a Codespace running before this file existed,
+use "Rebuild Container" once (Command Palette → "Codespaces: Rebuild
+Container") to pick it up.
+
+When the frontend starts, open it from the **Ports tab's own link**, not a
+previously saved browser tab - Codespaces can issue a new forwarded address
+between sessions, and an old tab will 404 even though everything is working.
+
+Press Ctrl+C in the terminal running `start-dev.sh` to stop both the
+frontend and the backend together.
+
+### Running backend and frontend separately (for development)
+
+Backend only:
 ```
 pip install -r requirements.txt
 cp .env.example .env
@@ -44,7 +72,7 @@ forwarded out of the container. `uvicorn`'s own default (`127.0.0.1`) only
 accepts connections from inside the container - the port can still show as
 "active" while being completely unreachable from your browser.
 
-Frontend:
+Frontend only:
 ```
 cd frontend
 npm install
@@ -53,10 +81,7 @@ npm run dev
 ```
 Runs at http://localhost:5173, calling the API at http://localhost:8000.
 In Codespaces, the frontend detects its own forwarded address and finds
-the backend's forwarded address automatically - no manual URL setup
-needed. If a port's browser tab 404s right after starting it, open it
-from the Ports panel's own link rather than a reused/old tab; Codespaces
-can rotate the forwarded address between sessions.
+the backend's forwarded address automatically - no manual URL setup needed.
 
 ## Build phases
 
